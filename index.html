@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Game Client</title>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
+	  <style>
+      body {
+        height: 100%;
+      }
+      .drag {
+        border: 5px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Web Torrent!</h1>
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+    We are using Node.js <script>document.write(process.versions.node)</script>,
+    Chromium <script>document.write(process.versions.chrome)</script>,
+    and Electron <script>document.write(process.versions.electron)</script>.
+	<!--
+    <div id="dropTarget" width="100px" height="100px" >
+    Drop?
+    </div>
+  -->
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')
+    </script>
+    <div>Client Node:
+        <br><label id="cdownloaded">Downloaded: N/A</label>
+        <br><label id="cuploadSpeed">UploadSpeed: N/A </label>
+    </div>
+
+
+    <div>Magnet URI
+        <input id="torrentId" name="torrentId" placeholder="magnet:" size="100" />
+      <br><label id="downloaded">Downloaded: N/A</label>
+      <br><label id="numPeers">Peers: 0</label>
+      <br><label id="progress">Progress: 0 </label>
+      <br><label id="remaining"> N/A </label>
+      <br><label id="total">Total: 0 </label>
+      <br><label id="downloadSpeed">DownloadSpeed: N/A </label> 
+      <br><label id="uploadSpeed">UploadSpeed: N/A </label>
+
+    </div>
+
+
+  </body>
+</html>

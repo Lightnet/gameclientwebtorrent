@@ -1,0 +1,4 @@
+node_modules
+gamedata/
+package-lock.json
+run.bat
