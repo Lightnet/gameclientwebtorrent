@@ -22,6 +22,8 @@
   "dependencies": {
     "drag-drop": "^2.13.2",
     "node-torrent": "^0.2.1",
+    "throttleit": "^1.0.0",
+    "thunky": "^1.0.2",
     "webtorrent": "^0.98.21",
     "webtorrent-hybrid": "^1.0.6"
   }

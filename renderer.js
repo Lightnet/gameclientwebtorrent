@@ -5,10 +5,58 @@
 //var dragDrop = require('drag-drop');
 var WebTorrent = require('webtorrent');
 //var WebTorrent = require('webtorrent-hybrid');
+//var WebTorrent = require('webtorrent/webtorrent.min')
+
+
+var port = 3000;
+var config_opts = {
+  path:"./gamedata"
+}
+
+var thunky = require('thunky');
+var throttle = require('throttleit');
 
 var magnetURI = 'magnet:?xt=urn:btih:fe06cb11946b7397f213017615e3d2c232816a60&dn=gd3mechs.pck&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com';
 
-var client = new WebTorrent();
+//var client = new WebTorrent();
+//client.add(magnetURI, onTorrent);
+
+//window.client = client // for easier debugging
+
+var getClient = thunky(function (cb) {
+  var client = new WebTorrent({
+    //tracker: {
+      //rtcConfig: rtcConfig
+    //}
+  });
+  window.client = client; // for easier debugging
+  client.add(magnetURI, onTorrent);
+  cb(null, client);
+});
+
+function downloadTorrent (torrentId) {
+  getClient(function (err, client) {
+    //if (err) return util.error(err)
+    client.add(torrentId, onTorrent)
+  });
+}
+
+function init () {
+  if (!WebTorrent.WEBRTC_SUPPORT) {
+    console.log('This browser is unsupported. Please use a browser with WebRTC support.')
+  }
+
+  // For performance, create the client immediately
+  getClient(function () {})
+
+  //
+  //getClient(function (err, client) {
+    //if (err) return util.error(err)
+    //client.add(magnetURI, onTorrent);
+  //})
+}
+
+
 
 var update_clienttorrent = function(torrent){
   var $numPeers = document.querySelector('#numPeers');
@@ -53,32 +101,29 @@ var updateclient = function(){
     //console.log(client.torrents[0]);
     update_clienttorrent(client.torrents[0]);
   }
-  console.log("update client...");
+  //console.log("update client...");
 };
-
+/*
 var interval = setInterval(()=>{
   updateclient();
 }, 1000);
-
+*/
+/*
 client.on('error', function (err) {
   console.error('ERROR: ' + err.message);
-})
-
+});
+*/
+/*
 client.on('torrent', function (torrent) {
   console.log("test torrent");
 });
+*/
 
-console.log("init.. client");
-var port = 3000;
-var config_opts = {
-  path:"./gamedata"
-}
 
-window.onload=function(){
-  document.querySelector('#torrentId').value = magnetURI;
-}
+
 
 //status
+/*
 client.on('download', function (bytes) {
   console.log('just downloaded: ' + bytes);
   var downloadSpeed = document.querySelector('#downloadSpeed');
@@ -96,11 +141,13 @@ client.on('download', function (bytes) {
   var progress = document.querySelector('#progress');
   progress.innerHTML = (client.progress * 100).toFixed(1) + '%';
 });
-
-client.add(magnetURI, config_opts, function (torrent) {
-  var server = torrent.createServer()
-  server.listen(port) // start the server listening to a port
+*/
+function onTorrent(torrent){
+  //var server = torrent.createServer();
+  //server.listen(port) // start the server listening to a port
   //console.log(torrent);
+  console.log("torrent file:" + torrent.name);
+
   torrent.on('ready', function () {
     console.log("torrent ready!");
   });
@@ -134,16 +181,24 @@ client.add(magnetURI, config_opts, function (torrent) {
 
     $downloadSpeed.innerHTML = "DownloadSpeed:"+ prettyBytes(torrent.downloadSpeed) + '/s';
     $uploadSpeed.innerHTML = "UploadSpeed:"+ prettyBytes(torrent.uploadSpeed) + '/s';
+    console.log("torrent update?");
   }
   var interval = setInterval(()=>{
     updatetorrent();
-  }, 5000);
+  }, 1000);
+  //var interval = setInterval(updatetorrent,5000);
+
+  //torrent.on('download', throttle(updatetorrent, 250));
+  //torrent.on('upload', throttle(updatetorrent, 250));
+  //var interval = setInterval(updatetorrent,5000);
+  //var interval = setInterval(()=>{updatetorrent()},100);
+  updatetorrent();
 
   torrent.on('done', function(){
     console.log('torrent finished downloading');
     console.log('Progress: 100%');
     updatetorrent();
-    clearInterval(interval)
+    clearInterval(interval);
     torrent.files.forEach(function(file){
        // do something with file
     })
@@ -157,7 +212,9 @@ client.add(magnetURI, config_opts, function (torrent) {
     // more. Specify a container element (CSS selector or reference to DOM node).
     //file.appendTo('body')
   });
-});
+}
+
+//client.add(magnetURI, config_opts,onTorrent);
 
 // When user drops files on the browser, create a new torrent and start seeding it!
 /*
@@ -179,4 +236,12 @@ function prettyBytes(num) {
   num = Number((num / Math.pow(1000, exponent)).toFixed(2))
   unit = units[exponent]
   return (neg ? '-' : '') + num + ' ' + unit
+}
+
+window.onload=function(){
+  console.log("init.. client");
+  document.querySelector('#torrentId').value = magnetURI;
+  //init();
+  var client = new WebTorrent();
+  client.add(magnetURI, config_opts, onTorrent);
 }
